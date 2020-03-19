@@ -1,0 +1,82 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Project:</h2>
+G:\新建文件夹\基于光电对管的自动巡线小车\基于光电对管的自动巡线小车\程序\遥控+巡线版\遥控+巡线\1.uvproj
+Project File Date:  12/26/2016
+
+<h2>Output:</h2>
+Rebuild target '1'
+compiling 1.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_SHOWRESULT?1
+Program Size: data=19.0 xdata=0 code=413
+creating hex file from "1"...
+"1" - 0 Error(s), 1 Warning(s).
+Rebuild target '1'
+compiling 1.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_SHOWRESULT?1
+Program Size: data=18.0 xdata=0 code=404
+creating hex file from "1"...
+"1" - 0 Error(s), 1 Warning(s).
+Rebuild target '1'
+compiling 1.c...
+1.c(100): error C202: 'l': undefined identifier
+1.c(100): error C202: 'r': undefined identifier
+1.c(100): error C202: 'l_g': undefined identifier
+1.c(100): error C202: 'r_g': undefined identifier
+1.c(102): error C202: 'l': undefined identifier
+1.c(102): error C202: 'r': undefined identifier
+1.c(102): error C202: 'l_g': undefined identifier
+1.c(102): error C202: 'r_g': undefined identifier
+1.c(103): error C202: 'l': undefined identifier
+1.c(103): error C202: 'r': undefined identifier
+1.c(103): error C202: 'l_g': undefined identifier
+1.c(103): error C202: 'r_g': undefined identifier
+1.c(104): error C202: 'l': undefined identifier
+1.c(104): error C202: 'r': undefined identifier
+1.c(104): error C202: 'l_g': undefined identifier
+1.c(104): error C202: 'r_g': undefined identifier
+1.c(106): error C202: 'l': undefined identifier
+1.c(106): error C202: 'r': undefined identifier
+1.c(106): error C202: 'l_g': undefined identifier
+1.c(106): error C202: 'r_g': undefined identifier
+1.c(107): error C202: 'l': undefined identifier
+1.c(107): error C202: 'r': undefined identifier
+1.c(107): error C202: 'l_g': undefined identifier
+1.c(107): error C202: 'r_g': undefined identifier
+1.c(108): error C202: 'l': undefined identifier
+1.c(108): error C202: 'r': undefined identifier
+1.c(108): error C202: 'l_g': undefined identifier
+1.c(108): error C202: 'r_g': undefined identifier
+1.c(110): error C202: 'l': undefined identifier
+1.c(110): error C202: 'r': undefined identifier
+Target not created
+Rebuild target '1'
+compiling 1.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_SHOWRESULT?1
+Program Size: data=18.0 xdata=0 code=353
+creating hex file from "1"...
+"1" - 0 Error(s), 1 Warning(s).
+Rebuild target '1'
+compiling 1.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_SHOWRESULT?1
+Program Size: data=18.0 xdata=0 code=412
+creating hex file from "1"...
+"1" - 0 Error(s), 1 Warning(s).
+Rebuild target '1'
+compiling 1.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_SHOWRESULT?1
+Program Size: data=18.0 xdata=0 code=412
+creating hex file from "1"...
+"1" - 0 Error(s), 1 Warning(s).

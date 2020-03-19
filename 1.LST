@@ -1,0 +1,229 @@
+C51 COMPILER V9.52.0.0   1                                                                 03/19/2017 14:36:20 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE 1
+OBJECT MODULE PLACED IN 1.OBJ
+COMPILER INVOKED BY: C:\Keil_v5_c51\C51\BIN\C51.EXE 1.c BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include "reg51.h"
+   2          #include "intrins.h"
+   3          
+   4          #define FOSC    15968000L
+   5          #define BAUD    2400
+   6          
+   7          typedef unsigned char BYTE;
+   8          typedef unsigned int WORD;
+   9          
+  10          /*Declare SFR associated with the ADC */
+  11          sfr ADC_CONTR   =   0xC5;           //ADC control register
+  12          sfr ADC_DATA    =   0xC6;           //ADC high 8-bit result register
+  13          sfr ADC_LOW2    =   0xBE;           //ADC low 2-bit result register
+  14          sfr P1M0        =   0x91;           //P1 mode control register0
+  15          sfr P1M1        =   0x92;           //P1 mode control register1
+  16          
+  17          /*Define ADC operation const for ADC_CONTR*/
+  18          #define ADC_POWER   0x80            //ADC power control bit
+  19          #define ADC_FLAG    0x10            //ADC complete flag
+  20          #define ADC_START   0x08            //ADC start control bit
+  21          #define ADC_SPEEDLL 0x00            //420 clocks
+  22          #define ADC_SPEEDL  0x20            //280 clocks
+  23          #define ADC_SPEEDH  0x40            //140 clocks
+  24          #define ADC_SPEEDHH 0x60            //70 clocks
+  25          
+  26          void InitUart();
+  27          void InitADC();
+  28          void SendData(BYTE dat);
+  29          BYTE GetADCResult(BYTE ch);
+  30          void Delay(WORD n);
+  31          void ShowResult(BYTE ch);
+  32          BYTE receive_date();
+  33          
+  34          sbit w=P3^7;//选择使用自动巡线还是蓝牙体感 高电平自动寻线
+  35          
+  36          //IN1 1.7
+  37          //IN2 1.6
+  38          //IN3 3.4
+  39          //IN4 3.5
+  40          
+  41          sbit IN3=P3^4;
+  42          sbit IN4=P3^5;
+  43          
+  44          sbit IN1=P1^7;
+  45          sbit IN2=P1^6;
+  46          
+  47          //l,r 控制左右电机启动或关闭，0打开，1关闭
+  48          //1_g 控制电机前进还是后退 1,go 0,back
+  49          
+  50          void main()
+  51          {
+  52   1        BYTE i,max,tar,j,recv,cmd;
+  53   1        BYTE value[3];
+  54   1        InitUart();                     //Init UART, use to show ADC result
+  55   1        InitADC();                      //Init ADC sfr
+C51 COMPILER V9.52.0.0   1                                                                 03/19/2017 14:36:20 PAGE 2   
+
+  56   1        while (1)
+  57   1        {
+  58   2          cmd=w;
+  59   2          if(w)
+  60   2          {
+  61   3            i=0;
+  62   3            max=0;
+  63   3            tar=0;
+  64   3            j=0;
+  65   3            while(i<3)
+  66   3            {
+  67   4              value[i]=GetADCResult(i+2);
+  68   4              if(value[i]>max)
+  69   4              {
+  70   5                max=value[i];
+  71   5              }
+  72   4              i=i+1;      
+  73   4            }
+  74   3            while(j<3)
+  75   3            {
+  76   4              if(value[j]==max)
+  77   4              {
+  78   5                tar=j;
+  79   5              }
+  80   4              j=j+1;
+  81   4            }
+  82   3            if(tar==0)
+  83   3            {
+  84   4              IN1=0;IN2=0;IN3=0;IN4=1;
+  85   4            }
+  86   3                if(tar==1)
+  87   3            {
+  88   4               IN1=0;IN2=1;IN3=0;IN4=1;
+  89   4            }
+  90   3                if(tar==2)
+  91   3            {
+  92   4              IN1=0;IN2=1;IN3=0;IN4=0;
+  93   4            }
+  94   3          }
+  95   2          else
+  96   2          {
+  97   3            recv=receive_date();  
+  98   3            switch(recv)
+  99   3            {
+ 100   4              case 0x30:IN1=0;IN2=0;IN3=0;IN4=0;SendData(0x30);break;
+ 101   4              
+ 102   4              case 0x34:IN1=0;IN2=0;IN3=0;IN4=1;SendData(0x34);break;
+ 103   4              case 0x32:IN1=0;IN2=1;IN3=0;IN4=1;SendData(0x32);break;
+ 104   4              case 0x35:IN1=0;IN2=1;IN3=0;IN4=0;SendData(0x35);break;
+ 105   4              
+ 106   4              case 0x36:IN1=0;IN2=0;IN3=1;IN4=0;SendData(0x36);break;
+ 107   4              case 0x37:IN1=1;IN2=0;IN3=1;IN4=0;SendData(0x37);break;
+ 108   4              case 0x38:IN1=1;IN2=0;IN3=0;IN4=0;SendData(0x38);break;
+ 109   4              
+ 110   4              default:IN1=0;IN2=0;IN3=0;IN4=0;SendData(0xff);
+ 111   4            }
+ 112   3          }   
+ 113   2        }
+ 114   1      }
+ 115          
+ 116          /*----------------------------
+ 117          Send ADC result to UART
+C51 COMPILER V9.52.0.0   1                                                                 03/19/2017 14:36:20 PAGE 3   
+
+ 118          ----------------------------*/
+ 119          void ShowResult(BYTE ch)
+ 120          {
+ 121   1          SendData(ch);                   //Show Channel NO.
+ 122   1          SendData(GetADCResult(ch));     //Show ADC high 8-bit result
+ 123   1      
+ 124   1      //if you want show 10-bit result, uncomment next line
+ 125   1      //    SendData(ADC_LOW2);             //Show ADC low 2-bit result
+ 126   1      }
+ 127          
+ 128          /*----------------------------
+ 129          Get ADC result
+ 130          ----------------------------*/
+ 131          BYTE GetADCResult(BYTE ch)
+ 132          {
+ 133   1          ADC_CONTR = ADC_POWER | ADC_SPEEDH | ch | ADC_START;
+ 134   1          _nop_();                        //Must wait before inquiry
+ 135   1          _nop_();
+ 136   1          _nop_();
+ 137   1          _nop_();
+ 138   1          while (!(ADC_CONTR & ADC_FLAG));//Wait complete flag
+ 139   1          ADC_CONTR &= ~ADC_FLAG;         //Close ADC
+ 140   1      
+ 141   1          return ADC_DATA;                //Return ADC result
+ 142   1      }
+ 143          
+ 144          /*----------------------------
+ 145          Initial UART
+ 146          ----------------------------*/
+ 147          void InitUart()
+ 148          {
+ 149   1          SCON = 0x5a;                    //8 bit data ,no parity bit
+ 150   1          TMOD = 0x20;                    //T1 as 8-bit auto reload
+ 151   1          TH1 = TL1 = -(FOSC/12/32/BAUD); //Set Uart baudrate
+ 152   1          TR1 = 1;                        //T1 start running
+ 153   1      }
+ 154          
+ 155          /*----------------------------
+ 156          Initial ADC sfr
+ 157          ----------------------------*/
+ 158          void InitADC()
+ 159          {
+ 160   1          P1 = P1M0 = P1M1 = 0x3c;        //Set all P1 as Open-Drain mode  0011 1100
+ 161   1          ADC_DATA = 0;                   //Clear previous result
+ 162   1          ADC_CONTR = ADC_POWER | ADC_SPEEDLL;
+ 163   1          Delay(2);                       //ADC power-on and delay
+ 164   1      }
+ 165          
+ 166          /*----------------------------
+ 167          Send one byte data to PC
+ 168          Input: dat (UART data)
+ 169          Output:-
+ 170          ----------------------------*/
+ 171          void SendData(BYTE dat)
+ 172          {
+ 173   1          while (!TI);                    //Wait for the previous data is sent
+ 174   1          TI = 0;                         //Clear TI flag
+ 175   1          SBUF = dat;                     //Send current data
+ 176   1      }
+ 177          
+ 178          /*----------------------------
+ 179          Software delay function
+C51 COMPILER V9.52.0.0   1                                                                 03/19/2017 14:36:20 PAGE 4   
+
+ 180          ----------------------------*/
+ 181          void Delay(WORD n)
+ 182          {
+ 183   1          WORD x;
+ 184   1      
+ 185   1          while (n--)
+ 186   1          {
+ 187   2              x = 5000;
+ 188   2              while (x--);
+ 189   2          }
+ 190   1      }
+ 191          
+ 192          /*----------------------------
+ 193          receive char
+ 194          ----------------------------*/
+ 195          BYTE receive_date()
+ 196          {
+ 197   1          while (!RI);                    
+ 198   1          RI = 0;    
+ 199   1          return SBUF;                   
+ 200   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    397    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       9
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
